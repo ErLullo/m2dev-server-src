@@ -987,11 +987,11 @@ bool CWarMapManager::LoadWarMapInfo(const char * c_pszFileName)
 	k->bType = WAR_MAP_TYPE_NORMAL;
 
 	k->lMapIndex = 110;
-	k->posStart[0].x = 48 * 100 + 32000;
+	k->posStart[0].x = 48 * 100 + 25600;
 	k->posStart[0].y = 52 * 100 + 0;
-	k->posStart[1].x = 183 * 100 + 32000;
+	k->posStart[1].x = 183 * 100 + 25600;
 	k->posStart[1].y = 206 * 100 + 0;
-	k->posStart[2].x = 141 * 100 + 32000;
+	k->posStart[2].x = 141 * 100 + 25600;
 	k->posStart[2].y = 117 * 100 + 0;
 
 	m_map_kWarMapInfo.insert(std::make_pair(k->lMapIndex, k));
@@ -1000,11 +1000,11 @@ bool CWarMapManager::LoadWarMapInfo(const char * c_pszFileName)
 	k->bType = WAR_MAP_TYPE_FLAG;
 
 	k->lMapIndex = 111;
-	k->posStart[0].x = 68 * 100 + 57600;
+	k->posStart[0].x = 68 * 100 + 51200;
 	k->posStart[0].y = 69 * 100 + 0;
-	k->posStart[1].x = 171 * 100 + 57600;
+	k->posStart[1].x = 171 * 100 + 51200;
 	k->posStart[1].y = 182 * 100 + 0; 
-	k->posStart[2].x = 122 * 100 + 57600;
+	k->posStart[2].x = 122 * 100 + 51200;
 	k->posStart[2].y = 131 * 100 + 0;
 
 	m_map_kWarMapInfo.insert(std::make_pair(k->lMapIndex, k));
