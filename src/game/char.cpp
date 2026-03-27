@@ -5099,28 +5099,29 @@ void CHARACTER::OnClick(LPCHARACTER pkChrCauser)
 	}
 
 
-	pkChrCauser->SetQuestNPCID(GetVID());
-
-	if (quest::CQuestManager::instance().Click(pkChrCauser->GetPlayerID(), this))
+	if (IsPC())
 	{
+		pkChrCauser->SetQuestNPCID(GetVID());
+		quest::CQuestManager::instance().Click(pkChrCauser->GetPlayerID(), this);
 		return;
 	}
 
-
-	// NPC 전용 기능 수행 : 상점 열기 등
-	if (!IsPC())
+	switch (m_triggerOnClick.bType)
 	{
-		if (!m_triggerOnClick.pFunc)
-		{
-			// NPC 트리거 시스템 로그 보기
-			//sys_err("%s.OnClickFailure(%s) : triggerOnClick.pFunc is EMPTY(pid=%d)", 
-			//			pkChrCauser->GetName(),
-			//			GetName(),
-			//			pkChrCauser->GetPlayerID());
-			return;
-		}
+		case ON_CLICK_TALK:
+			pkChrCauser->SetQuestNPCID(GetVID());
+			if (quest::CQuestManager::instance().Click(pkChrCauser->GetPlayerID(), this))
+				return;
 
-		m_triggerOnClick.pFunc(this, pkChrCauser);
+		case ON_CLICK_SHOP:
+			CShopManager::instance().StartShopping(pkChrCauser, this);
+			return;
+
+		case ON_CLICK_NONE:
+			return;
+
+		default:
+			return;
 	}
 
 }
