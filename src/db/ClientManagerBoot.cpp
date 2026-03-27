@@ -201,8 +201,15 @@ bool CClientManager::InitializeMobTable()
 		isNameFile = false;
 	} else {
 		nameData.Next();	//설명row 생략.
-		while(nameData.Next()) {
-			localMap[atoi(nameData.AsStringByIndex(0))] = nameData.AsStringByIndex(1);
+		while (nameData.Next())
+		{
+			int key = atoi(nameData.AsStringByIndex(0));
+
+			const char* value = "";
+			if (nameData.ColCount() > 1)
+				value = nameData.AsStringByIndex(1);
+
+			localMap[key] = value;
 		}
 	}
 	//________________________________________________//
