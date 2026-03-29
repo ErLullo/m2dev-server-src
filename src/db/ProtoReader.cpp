@@ -581,108 +581,225 @@ int get_Mob_ImmuneFlag_Value(string inputString)
 
 #ifndef __DUMP_PROTO__
 
+void RegisterMobProtoAliases(cCsvTable& table)
+{
+	table.AddAlias("vnum", 0);
+	table.AddAlias("name", 1);
+	table.AddAlias("rank", 2);
+	table.AddAlias("type", 3);
+	table.AddAlias("battle_type", 4);
+	table.AddAlias("level", 5);
+	table.AddAlias("size", 6);
+	table.AddAlias("ai_flag", 7);
+	table.AddAlias("mount_capacity", 8);
+	table.AddAlias("race_flag", 9);
+	table.AddAlias("immune_flag", 10);
+	table.AddAlias("empire", 11);
+	table.AddAlias("folder", 12);
+	table.AddAlias("on_click", 13);
+	table.AddAlias("st", 14);
+	table.AddAlias("dx", 15);
+	table.AddAlias("ht", 16);
+	table.AddAlias("iq", 17);
+	table.AddAlias("damage_min", 18);
+	table.AddAlias("damage_max", 19);
+	table.AddAlias("max_hp", 20);
+	table.AddAlias("regen_cycle", 21);
+	table.AddAlias("regen_percent", 22);
+	table.AddAlias("gold_min", 23);
+	table.AddAlias("gold_max", 24);
+	table.AddAlias("exp", 25);
+	table.AddAlias("def", 26);
+	table.AddAlias("attack_speed", 27);
+	table.AddAlias("move_speed", 28);
+	table.AddAlias("aggressive_hp_pct", 29);
+	table.AddAlias("aggressive_sight", 30);
+	table.AddAlias("attack_range", 31);
+	table.AddAlias("drop_item", 32);
+	table.AddAlias("resurrection_vnum", 33);
+	table.AddAlias("enchant_curse", 34);
+	table.AddAlias("enchant_slow", 35);
+	table.AddAlias("enchant_poison", 36);
+	table.AddAlias("enchant_stun", 37);
+	table.AddAlias("enchant_critical", 38);
+	table.AddAlias("enchant_penetrate", 39);
+	table.AddAlias("resist_sword", 40);
+	table.AddAlias("resist_twohand", 41);
+	table.AddAlias("resist_dagger", 42);
+	table.AddAlias("resist_bell", 43);
+	table.AddAlias("resist_fan", 44);
+	table.AddAlias("resist_bow", 45);
+	table.AddAlias("resist_fire", 46);
+	table.AddAlias("resist_elect", 47);
+	table.AddAlias("resist_magic", 48);
+	table.AddAlias("resist_wind", 49);
+	table.AddAlias("resist_poison", 50);
+	table.AddAlias("dam_multiply", 51);
+	table.AddAlias("summon", 52);
+	table.AddAlias("drain_sp", 53);
+	table.AddAlias("mob_color", 54);
+	table.AddAlias("polymorph_item", 55);
+	table.AddAlias("skill_level0", 56);
+	table.AddAlias("skill_vnum0", 57);
+	table.AddAlias("skill_level1", 58);
+	table.AddAlias("skill_vnum1", 59);
+	table.AddAlias("skill_level2", 60);
+	table.AddAlias("skill_vnum2", 61);
+	table.AddAlias("skill_level3", 62);
+	table.AddAlias("skill_vnum3", 63);
+	table.AddAlias("skill_level4", 64);
+	table.AddAlias("skill_vnum4", 65);
+	table.AddAlias("sp_berserk", 66);
+	table.AddAlias("sp_stoneskin", 67);
+	table.AddAlias("sp_godspeed", 68);
+	table.AddAlias("sp_deathblow", 69);
+	table.AddAlias("sp_revive", 70);
+}
+
 //몹 테이블을 셋팅해준다.
 bool Set_Proto_Mob_Table(TMobTable *mobTable, cCsvTable &csvTable,std::map<int,const char*> &nameMap)
 {
-	int col = 0;
-	str_to_number(mobTable->dwVnum, csvTable.AsStringByIndex(col++));
-	strlcpy(mobTable->szName, csvTable.AsStringByIndex(col++), sizeof(mobTable->szName));
+	//VNUM
+	mobTable->dwVnum = csvTable.AsInt("vnum");
 
-	//3. 지역별 이름 넣어주기.
-	map<int,const char*>::iterator it;
-	it = nameMap.find(mobTable->dwVnum);
-	if (it != nameMap.end()) {
-		const char * localeName = it->second;
-		strlcpy(mobTable->szLocaleName, localeName, sizeof (mobTable->szLocaleName));
-	} else {
-		strlcpy(mobTable->szLocaleName, mobTable->szName, sizeof (mobTable->szLocaleName));
+	//NAME
+	strncpy(mobTable->szName, csvTable.AsString("name"), CHARACTER_NAME_MAX_LEN);
+	mobTable->szName[CHARACTER_NAME_MAX_LEN] = '\0';
+
+	//LOCALE_NAME
+	auto it = nameMap.find(mobTable->dwVnum);
+	if (it != nameMap.end())
+	{
+		strncpy(mobTable->szLocaleName, it->second, CHARACTER_NAME_MAX_LEN);
 	}
+	else
+	{
+		strncpy(mobTable->szLocaleName, mobTable->szName, CHARACTER_NAME_MAX_LEN);
+	}
+	mobTable->szLocaleName[CHARACTER_NAME_MAX_LEN] = '\0';
 
 	//RANK
-	int rankValue = get_Mob_Rank_Value(csvTable.AsStringByIndex(col++));
-	mobTable->bRank = rankValue;
+	mobTable->bRank = get_Mob_Rank_Value(csvTable.AsString("rank"));
+
 	//TYPE
-	int typeValue = get_Mob_Type_Value(csvTable.AsStringByIndex(col++));
-	mobTable->bType = typeValue;
+	mobTable->bType = get_Mob_Type_Value(csvTable.AsString("type"));
+
 	//BATTLE_TYPE
-	int battleTypeValue = get_Mob_BattleType_Value(csvTable.AsStringByIndex(col++));
-	mobTable->bBattleType = battleTypeValue;
+	mobTable->bBattleType = get_Mob_BattleType_Value(csvTable.AsString("battle_type"));
 
-	str_to_number(mobTable->bLevel, csvTable.AsStringByIndex(col++));
+	//LEVEL
+	mobTable->bLevel = csvTable.AsInt("level");
+
 	//SIZE
-	int sizeValue = get_Mob_Size_Value(csvTable.AsStringByIndex(col++));
-	mobTable->bSize = sizeValue;
+	mobTable->bSize = get_Mob_Size_Value(csvTable.AsString("size"));
+
 	//AI_FLAG
-	int aiFlagValue = get_Mob_AIFlag_Value(csvTable.AsStringByIndex(col++));
-	mobTable->dwAIFlag = aiFlagValue;
-	//mount_capacity;
-	col++;
+	mobTable->dwAIFlag = get_Mob_AIFlag_Value(csvTable.AsString("ai_flag"));
+
+	//MOUNT_CAPACITY (skipped)
+
 	//RACE_FLAG
-	int raceFlagValue = get_Mob_RaceFlag_Value(csvTable.AsStringByIndex(col++));
-	mobTable->dwRaceFlag = raceFlagValue;
+	mobTable->dwRaceFlag = get_Mob_RaceFlag_Value(csvTable.AsString("race_flag"));
+
 	//IMMUNE_FLAG
-	int immuneFlagValue = get_Mob_ImmuneFlag_Value(csvTable.AsStringByIndex(col++));
-	mobTable->dwImmuneFlag = immuneFlagValue;
+	mobTable->dwImmuneFlag = get_Mob_ImmuneFlag_Value(csvTable.AsString("immune_flag"));
 
-	str_to_number(mobTable->bEmpire, csvTable.AsStringByIndex(col++));  //col = 11
+	//EMPIRE
+	mobTable->bEmpire = csvTable.AsInt("empire");
 
-	strlcpy(mobTable->szFolder, csvTable.AsStringByIndex(col++), sizeof(mobTable->szFolder));
+	//FOLDER
+	strncpy(mobTable->szFolder, csvTable.AsString("folder"), FOLDER_NAME_MAX_LEN);
+	mobTable->szFolder[FOLDER_NAME_MAX_LEN] = '\0';
 
-	str_to_number(mobTable->bOnClickType, csvTable.AsStringByIndex(col++));	
+	//ON_CLICK
+	mobTable->bOnClickType = csvTable.AsInt("on_click");
 
-	str_to_number(mobTable->bStr, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bDex, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bCon, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bInt, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->dwDamageRange[0], csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->dwDamageRange[1], csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->dwMaxHP, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bRegenCycle, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bRegenPercent,	csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->dwGoldMin, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->dwGoldMax, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->dwExp,	csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->wDef, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->sAttackSpeed, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->sMovingSpeed, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bAggresiveHPPct, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->wAggressiveSight, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->wAttackRange, csvTable.AsStringByIndex(col++));
+	//STATS
+	mobTable->bStr = csvTable.AsInt("st");
+	mobTable->bDex = csvTable.AsInt("dx");
+	mobTable->bCon = csvTable.AsInt("ht");
+	mobTable->bInt = csvTable.AsInt("iq");
 
-	str_to_number(mobTable->dwDropItemVnum, csvTable.AsStringByIndex(col++));	//32
-	str_to_number(mobTable->dwResurrectionVnum, csvTable.AsStringByIndex(col++));
-	for (int i = 0; i < MOB_ENCHANTS_MAX_NUM; ++i)
-		str_to_number(mobTable->cEnchants[i], csvTable.AsStringByIndex(col++));
+	//DAMAGE
+	mobTable->dwDamageRange[0] = csvTable.AsInt("damage_min");
+	mobTable->dwDamageRange[1] = csvTable.AsInt("damage_max");
 
-	for (int i = 0; i < MOB_RESISTS_MAX_NUM; ++i)
-		str_to_number(mobTable->cResists[i], csvTable.AsStringByIndex(col++));
+	//HP / REGEN
+	mobTable->dwMaxHP = csvTable.AsInt("max_hp");
+	mobTable->bRegenCycle = csvTable.AsInt("regen_cycle");
+	mobTable->bRegenPercent = csvTable.AsInt("regen_percent");
 
-	str_to_number(mobTable->fDamMultiply, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->dwSummonVnum, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->dwDrainSP, csvTable.AsStringByIndex(col++));
+	//GOLD
+	mobTable->dwGoldMin = csvTable.AsInt("gold_min");
+	mobTable->dwGoldMax = csvTable.AsInt("gold_max");
 
-	//Mob_Color
-	// ++col;
-	str_to_number(mobTable->dwMobColor, csvTable.AsStringByIndex(col++));
+	//EXP
+	mobTable->dwExp = csvTable.AsInt("exp");
 
-	str_to_number(mobTable->dwPolymorphItemVnum, csvTable.AsStringByIndex(col++));
+	//DEFENSE / SPEED
+	mobTable->wDef = csvTable.AsInt("def");
+	mobTable->sAttackSpeed = csvTable.AsInt("attack_speed");
+	mobTable->sMovingSpeed = csvTable.AsInt("move_speed");
 
-	str_to_number(mobTable->Skills[0].bLevel, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[0].dwVnum, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[1].bLevel, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[1].dwVnum, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[2].bLevel, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[2].dwVnum, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[3].bLevel, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[3].dwVnum, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[4].bLevel, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->Skills[4].dwVnum, csvTable.AsStringByIndex(col++));
+	//AGGRO
+	mobTable->bAggresiveHPPct = csvTable.AsInt("aggressive_hp_pct");
+	mobTable->wAggressiveSight = csvTable.AsInt("aggressive_sight");
+	mobTable->wAttackRange = csvTable.AsInt("attack_range");
 
-	str_to_number(mobTable->bBerserkPoint, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bStoneSkinPoint, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bGodSpeedPoint, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bDeathBlowPoint, csvTable.AsStringByIndex(col++));
-	str_to_number(mobTable->bRevivePoint, csvTable.AsStringByIndex(col++));
+	//DROP
+	mobTable->dwDropItemVnum = csvTable.AsInt("drop_item");
+
+	//RESURRECTION
+	mobTable->dwResurrectionVnum = csvTable.AsInt("resurrection_vnum");
+
+	//ENCHANTS
+	mobTable->cEnchants[0] = csvTable.AsInt("enchant_curse");
+	mobTable->cEnchants[1] = csvTable.AsInt("enchant_slow");
+	mobTable->cEnchants[2] = csvTable.AsInt("enchant_poison");
+	mobTable->cEnchants[3] = csvTable.AsInt("enchant_stun");
+	mobTable->cEnchants[4] = csvTable.AsInt("enchant_critical");
+	mobTable->cEnchants[5] = csvTable.AsInt("enchant_penetrate");
+
+	//RESISTS
+	mobTable->cResists[0] = csvTable.AsInt("resist_sword");
+	mobTable->cResists[1] = csvTable.AsInt("resist_twohand");
+	mobTable->cResists[2] = csvTable.AsInt("resist_dagger");
+	mobTable->cResists[3] = csvTable.AsInt("resist_bell");
+	mobTable->cResists[4] = csvTable.AsInt("resist_fan");
+	mobTable->cResists[5] = csvTable.AsInt("resist_bow");
+	mobTable->cResists[6] = csvTable.AsInt("resist_fire");
+	mobTable->cResists[7] = csvTable.AsInt("resist_elect");
+	mobTable->cResists[8] = csvTable.AsInt("resist_magic");
+	mobTable->cResists[9] = csvTable.AsInt("resist_wind");
+	mobTable->cResists[10] = csvTable.AsInt("resist_poison");
+
+	//ETC
+	mobTable->fDamMultiply = csvTable.AsInt("dam_multiply");
+	mobTable->dwSummonVnum = csvTable.AsInt("summon");
+	mobTable->dwDrainSP = csvTable.AsInt("drain_sp");
+	mobTable->dwMobColor = csvTable.AsInt("mob_color");
+
+	//POLYMORPH
+	mobTable->dwPolymorphItemVnum = csvTable.AsInt("polymorph_item");
+
+	//SKILLS
+	mobTable->Skills[0].bLevel = csvTable.AsInt("skill_level0");
+	mobTable->Skills[0].dwVnum = csvTable.AsInt("skill_vnum0");
+	mobTable->Skills[1].bLevel = csvTable.AsInt("skill_level1");
+	mobTable->Skills[1].dwVnum = csvTable.AsInt("skill_vnum1");
+	mobTable->Skills[2].bLevel = csvTable.AsInt("skill_level2");
+	mobTable->Skills[2].dwVnum = csvTable.AsInt("skill_vnum2");
+	mobTable->Skills[3].bLevel = csvTable.AsInt("skill_level3");
+	mobTable->Skills[3].dwVnum = csvTable.AsInt("skill_vnum3");
+	mobTable->Skills[4].bLevel = csvTable.AsInt("skill_level4");
+	mobTable->Skills[4].dwVnum = csvTable.AsInt("skill_vnum4");
+
+	//SPECIAL_POINTS
+	mobTable->bBerserkPoint = csvTable.AsInt("sp_berserk");
+	mobTable->bStoneSkinPoint = csvTable.AsInt("sp_stoneskin");
+	mobTable->bGodSpeedPoint = csvTable.AsInt("sp_godspeed");
+	mobTable->bDeathBlowPoint = csvTable.AsInt("sp_deathblow");
+	mobTable->bRevivePoint = csvTable.AsInt("sp_revive");
 
 	sys_log(0, "MOB #%-5d %-24s level: %-3u rank: %u empire: %d", mobTable->dwVnum, mobTable->szLocaleName, mobTable->bLevel, mobTable->bRank, mobTable->bEmpire);
 

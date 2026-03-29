@@ -231,6 +231,9 @@ bool CClientManager::InitializeMobTable()
 	//2. (c)[test_map_mobTableByVnum](vnum:TMobTable) 맵 생성.
 	map<DWORD, TMobTable *> test_map_mobTableByVnum;
 	if (isTestFile) {
+
+		RegisterMobProtoAliases(test_data);
+
 		test_data.Next();	//설명 로우 넘어가기.
 
 		//ㄱ. 테스트 몬스터 테이블 생성.
@@ -268,12 +271,15 @@ bool CClientManager::InitializeMobTable()
 		fprintf(stderr, "conf/mob_proto.txt 파일을 읽어오지 못했습니다\n");
 		return false;
 	}
+
+	RegisterMobProtoAliases(data);
+
 	data.Next();					//설명 row 넘어가기
 	//2. (!)[mob_table] 생성하기
 	//2.1 새로 추가되는 갯수를 파악
 	int addNumber = 0;
 	while(data.Next()) {
-		int vnum = atoi(data.AsStringByIndex(0));
+		int vnum = data.AsInt("vnum");
 		std::map<DWORD, TMobTable *>::iterator it_map_mobTable;
 		it_map_mobTable = test_map_mobTableByVnum.find(vnum);
 		if(it_map_mobTable != test_map_mobTableByVnum.end()) {
@@ -287,6 +293,9 @@ bool CClientManager::InitializeMobTable()
 		fprintf(stderr, "conf/mob_proto.txt 파일을 읽어오지 못했습니다\n");
 		return false;
 	}
+
+	RegisterMobProtoAliases(data);
+
 	data.Next(); //맨 윗줄 제외 (아이템 칼럼을 설명하는 부분)
 	//2.2 크기에 맞게 mob_table 생성
 	if (!m_vec_mobTable.empty())
@@ -304,7 +313,7 @@ bool CClientManager::InitializeMobTable()
 		//(b)[test_map_mobTableByVnum]에 같은 row가 있는지 조사.
 		bool isSameRow = true;
 		std::map<DWORD, TMobTable *>::iterator it_map_mobTable;
-		it_map_mobTable = test_map_mobTableByVnum.find(atoi(data.AsStringByIndex(col)));
+		it_map_mobTable = test_map_mobTableByVnum.find(data.AsInt("vnum"));
 		if(it_map_mobTable == test_map_mobTableByVnum.end()) {
 			isSameRow = false;
 		}
@@ -313,8 +322,8 @@ bool CClientManager::InitializeMobTable()
 			TMobTable *tempTable = it_map_mobTable->second;
 
 			mob_table->dwVnum = tempTable->dwVnum;
-			strlcpy(mob_table->szName, tempTable->szName, sizeof(tempTable->szName));
-			strlcpy(mob_table->szLocaleName, tempTable->szLocaleName, sizeof(tempTable->szName));
+			strlcpy(mob_table->szName, tempTable->szName, CHARACTER_NAME_MAX_LEN);
+			strlcpy(mob_table->szLocaleName, tempTable->szLocaleName, CHARACTER_NAME_MAX_LEN);
 			mob_table->bRank = tempTable->bRank;
 			mob_table->bType = tempTable->bType;
 			mob_table->bBattleType = tempTable->bBattleType;
@@ -324,7 +333,7 @@ bool CClientManager::InitializeMobTable()
 			mob_table->dwRaceFlag = tempTable->dwRaceFlag;
 			mob_table->dwImmuneFlag = tempTable->dwImmuneFlag;
 			mob_table->bEmpire = tempTable->bEmpire;
-			strlcpy(mob_table->szFolder, tempTable->szFolder, sizeof(tempTable->szName));
+			strlcpy(mob_table->szFolder, tempTable->szFolder, FOLDER_NAME_MAX_LEN);
 			mob_table->bOnClickType = tempTable->bOnClickType;
 			mob_table->bStr = tempTable->bStr;
 			mob_table->bDex = tempTable->bDex;
@@ -408,13 +417,16 @@ bool CClientManager::InitializeMobTable()
 	}
 	
 	if (isTestFile) {
+
+		RegisterMobProtoAliases(test_data);
+
 		test_data.Next();	//설명 로우 넘어가기.
 
 		while (test_data.Next())	//테스트 데이터 각각을 훑어나가며,새로운 것을 추가한다.
 		{
 			//중복되는 부분이면 넘어간다.
 			set<int>::iterator itVnum;
-			itVnum = vnumSet.find(atoi(test_data.AsStringByIndex(0)));
+			itVnum = vnumSet.find(test_data.AsInt("vnum"));
 			
 			if (itVnum != vnumSet.end()) {
 				continue;
